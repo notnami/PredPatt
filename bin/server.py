@@ -37,7 +37,7 @@ def main():
         sentence = request.GET.get('sentence', '').strip()
 
     pp_opts = PredPattOpts()
-    for k, v in sorted(PredPattOpts().__dict__.iteritems()):
+    for k, v in sorted(PredPattOpts().__dict__.items()):
         v = int(request.GET.get(k, v))   # all options are true/false for now.
         setattr(pp_opts, k, v)
 
@@ -59,7 +59,7 @@ def main():
         patterns = dedent(patterns)
 
     opts = []
-    for k, v in sorted(pp_opts.__dict__.iteritems()):
+    for k, v in sorted(pp_opts.__dict__.items()):
         # Create a hidden textbox with the false value because the values of
         # "unchecked" boxes don't get posted with form.
         opts.append('<input type="hidden" value="0" name="%s">' % (k,))

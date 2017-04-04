@@ -45,7 +45,7 @@ def isPredVerb(pred):
 
 def isNotCopula(pred):
     copula_verbs = ['be', 'am', 'is', 'are', 'was', 'were', 'being', 'been']
-    if pred.root.gov_rel == u'cop':
+    if pred.root.gov_rel == 'cop':
         return False
     # just in case for parsing error (from Stanford Parser)
     if pred.root.text in copula_verbs:
@@ -71,7 +71,7 @@ def isGoodAncestor(pred):
                       "acl:relcl", "case", "conj", "parataxis", "csubj",
                       "compound", "nmod"}
     pointer = pred.root # index of predicate
-    while pointer.gov_rel != u'root':
+    while pointer.gov_rel != 'root':
         if pointer.gov_rel in embedding_deps:
             return False
         # Replace pointer with its head

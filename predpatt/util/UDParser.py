@@ -3,13 +3,13 @@ Wrapper around the Berkeley parser and the pyStanfordDependency converter.
 """
 import os
 import shelve
-import cPickle
 import StanfordDependencies
-from subprocess import Popen, PIPE
 from predpatt.UDParse import UDParse, DepTriple
 from predpatt.util.universal_tags import ptb2universal
 from nltk.tokenize import TreebankWordTokenizer
 from contextlib import contextmanager
+
+import pexpect
 
 
 @contextmanager
@@ -60,8 +60,7 @@ REPLACEMENTS = {'-LRB-': '(',
                 '-RCB-': '}'}
 
 # reverse mapping
-REPLACEMENTS_R = dict(zip(REPLACEMENTS.values(), REPLACEMENTS.keys()))
-
+REPLACEMENTS_R = dict(zip(list(REPLACEMENTS.values()), list(REPLACEMENTS.keys())))
 
 
 def tokenize(sentence):
@@ -89,7 +88,7 @@ class Cached(object):
         if self.cache is not None:
             # Serialize arguments using pickle to get a string-valued key
             # (shelve requires string-valued keys).
-            s = cPickle.dumps((args, tuple(sorted(kwargs.items()))))
+            s = str((args, tuple(sorted(kwargs.items()))))
             if s in self.cache:
                 try:
                     return self.cache[s]
@@ -116,7 +115,7 @@ class UDConverter(Cached):
 
     def fresh(self, parse):
         "Convert constituency parse to UD. Expects string, returns `UDParse` instance."
-        assert isinstance(parse, basestring)
+        assert isinstance(parse, str)
         deps = self.sd.convert_tree(parse)
         tokens = [e.form for e in deps]
         # convert tags
@@ -156,8 +155,8 @@ class Parser(Cached):
         self.to_ud = UDConverter.get_instance(CACHE)
 
     def _start_subprocess(self):
-        self.process = Popen(['java', '-jar', self.PARSER_JAR, '-gr', self.GRAMMAR],
-                             stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        command = ['java', '-jar', self.PARSER_JAR, '-gr', self.GRAMMAR]
+        self.process = pexpect.spawn(' '.join(command))
 
     def fresh(self, s, tokenized=False):
         """UD-parse and POS-tag sentence `s`. Returns (UDParse, PTB-parse-string).
@@ -166,7 +165,7 @@ class Parser(Cached):
         apply `nltk.tokenize.TreebankWordTokenizer`.
 
         """
-        if self.process is None:
+        if not self.process:
             self._start_subprocess()
         s = str(s.strip())
         if not tokenized:
@@ -174,18 +173,19 @@ class Parser(Cached):
         s = s.strip()
         assert '\n' not in s, "No newline characters allowed %r" % s
         try:
-            self.process.stdin.write(s)
+            self.process.sendline(s)
         except IOError as e:
             #if e.errno == 32:          # broken pipe
             #    self.process = None
             #    return self(s)  # retry will restart process
             raise e
-        self.process.stdin.write('\n')
-        out = self.process.stdout.readline()
+        self.process.expect('\r\n')
+        self.process.expect('\r\n')
+        out = self.process.before.decode('utf-8')
         return self.to_ud(out)
 
     def __del__(self):
-        if self.process is not None:
+        if self.process:
             self.process.terminate()
 
     @staticmethod
@@ -213,7 +213,7 @@ def main():
     args = q.parse_args()
     p = Parser.get_instance()
     t = p(args.sentence)
-    print t.pprint()
+    print(t.pprint())
     if args.view:
         t.view()
 

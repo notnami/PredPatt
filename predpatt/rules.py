@@ -10,7 +10,7 @@ class Rule(object):
     def explain(cls):
         return cls.__doc__
     def __cmp__(self, other):
-        return cmp(unicode(self), unicode(other))
+        return cmp(str(self), str(other))
 
 class PredicateRootRule(Rule):
     rule_type = 'predicate_root'
@@ -256,4 +256,4 @@ class en_relcl_dummy_arg_filter(EnglishSpecific):
 
 
 if __name__ == '__main__':
-    print a1(), a1().explain()
+    print(a1(), a1().explain())

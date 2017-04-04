@@ -41,8 +41,8 @@ class UDParse:
             cols[i % K].append(x)
         # add padding to columns because zip stops at shortest iterator.
         for c in cols:
-            c.extend('' for _ in xrange(len(cols[0]) - len(c)))
-        return tabulate(zip(*cols), tablefmt='plain')
+            c.extend('' for _ in range(len(cols[0]) - len(c)))
+        return tabulate(list(zip(*cols)), tablefmt='plain')
 
     def latex(self):
         "LaTeX dependency diagrams."

@@ -9,7 +9,7 @@ from predpatt import PredPatt, PredPattOpts, load_conllu, load_comm
 def main():
     # Make stdout utf-8 friendly. This is only really needed when redirecting stdout
     # to a file or less.
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+    # sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
     parser = ArgumentParser()
     parser.add_argument('filename',
@@ -42,20 +42,21 @@ def main():
         sentences = load_comm(args.filename)
 
     for sent_i, (slabel, parse) in enumerate(sentences, 1):
+        print(slabel)
         if args.debug and slabel != args.debug:  # supports substring match
             continue
 
-        print 'label:   ', slabel
-        print 'sentence:', ' '.join(parse.tokens)
+        print('label:   ', slabel)
+        print('sentence:', ' '.join(parse.tokens))
 
         if args.debug:
             args.show_deps = True
 
         if args.show_deps:
-            print
-            print 'tags:', ' '.join('%s/%s' % (x, tag) for tag, x in zip(parse.tags, parse.tokens))
-            print
-            print parse.pprint(args.format=='color', K=args.show_deps_cols)
+            print()
+            print('tags:', ' '.join('%s/%s' % (x, tag) for tag, x in zip(parse.tags, parse.tokens)))
+            print()
+            print(parse.pprint(args.format=='color', K=args.show_deps_cols))
 
         opts = PredPattOpts(simple = args.simple,
                             cut = args.cut,
@@ -69,12 +70,12 @@ def main():
 
         #ppatt.instances = [e for e in ppatt.instances if filter_events_ksk(e, parse)]
 
-        print
-        print 'ppatt:'
-        print ppatt.pprint(color=args.format == 'color',
-                           track_rule=args.track_rule)
-        print
-        print
+        print()
+        print('ppatt:')
+        print(ppatt.pprint(color=args.format == 'color',
+                           track_rule=args.track_rule))
+        print()
+        print()
 
         if args.debug or sent_i == args.num:
             return
