@@ -156,7 +156,7 @@ class Parser(Cached):
 
     def _start_subprocess(self):
         command = ['java', '-jar', self.PARSER_JAR, '-gr', self.GRAMMAR]
-        self.process = pexpect.spawn(' '.join(command))
+        self.process = pexpect.spawn(' '.join(command), encoding='utf-8')
 
     def fresh(self, s, tokenized=False):
         """UD-parse and POS-tag sentence `s`. Returns (UDParse, PTB-parse-string).
@@ -179,9 +179,9 @@ class Parser(Cached):
             #    self.process = None
             #    return self(s)  # retry will restart process
             raise e
+        self.process.expect_exact(f'{s}\r\n')
         self.process.expect('\r\n')
-        self.process.expect('\r\n')
-        out = self.process.before.decode('utf-8')
+        out = self.process.before
         return self.to_ud(out)
 
     def __del__(self):
