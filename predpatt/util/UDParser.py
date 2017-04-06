@@ -182,7 +182,7 @@ class Parser(Cached):
 
         # the first line will be our own input, so we'll just skip it
         self.process.readline()
-        out = self.process.readline().decode('utf-8').strip()
+        out = self.process.readline().strip()
         return self.to_ud(out)
 
     def __del__(self):
