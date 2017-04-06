@@ -179,9 +179,10 @@ class Parser(Cached):
             #    self.process = None
             #    return self(s)  # retry will restart process
             raise e
-        self.process.expect_exact(f'{s}\r\n')
-        self.process.expect('\r\n')
-        out = self.process.before
+
+        # the first line will be our own input, so we'll just skip it
+        self.process.readline()
+        out = self.process.readline().decode('utf-8').strip()
         return self.to_ud(out)
 
     def __del__(self):
